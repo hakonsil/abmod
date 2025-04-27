@@ -46,10 +46,11 @@ entry_angles=[
     ]
     
 def plot_sweep(mass=".01",angle="40"):
-    fl=glob.glob("run_ %s_* %s.txt"%(mass,angle))
+    fl=glob.glob("runs/run_ %s_* %s.txt"%(mass,angle))
     fl.sort()
     if len(fl) < 2:
         print("only found %d runs. not plotting"%(len(fl)))
+        print("runs/run_ %s_* %s.txt"%(mass,angle))
         return
     vels=n.array([15,25,35,45,55,65],dtype=n.int64)
     n_vels=len(vels)
@@ -75,7 +76,7 @@ def plot_sweep(mass=".01",angle="40"):
     plt.ylim([60,130])    
     plt.xlabel("SNR (dB)")
     plt.ylabel("Height (km)")
-    plt.savefig("plt-%s-%s.png"%(mass,angle))
+    plt.savefig("plots/plt-%s-%s.png"%(mass,angle))
     plt.close()
 #   plt.show()
 
@@ -92,4 +93,5 @@ def plot_sweep(mass=".01",angle="40"):
 for m in masses:
     for a in entry_angles:
         plot_sweep(mass=m,angle=a)
+
         

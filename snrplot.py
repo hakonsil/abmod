@@ -71,7 +71,7 @@ def plot_sweep(mass=".01",angle="40"):
     plt.legend()
     plt.axvline(-7)
     plt.title(r"m=%1.3f $\mu$g $\alpha=%d^{\circ}$"%(float(mass),int(angle) ))
-    plt.xlim([-100,50])
+    plt.xlim([-80,40])
     plt.ylim([60,130])    
     plt.xlabel("SNR (dB)")
     plt.ylabel("Height (km)")

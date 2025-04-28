@@ -50,7 +50,6 @@ def plot_sweep(mass=".01",angle="40"):
     fl.sort()
     if len(fl) < 2:
         print("only found %d runs. not plotting"%(len(fl)))
-        print("runs/run_ %s_* %s.txt"%(mass,angle))
         return
     vels=n.array([15,25,35,45,55,65],dtype=n.int64)
     n_vels=len(vels)
@@ -72,7 +71,7 @@ def plot_sweep(mass=".01",angle="40"):
     plt.legend()
     plt.axvline(-7)
     plt.title(r"m=%1.3f $\mu$g $\alpha=%d^{\circ}$"%(float(mass),int(angle) ))
-    plt.xlim([-200,80])
+    plt.xlim([-100,50])
     plt.ylim([60,130])    
     plt.xlabel("SNR (dB)")
     plt.ylabel("Height (km)")

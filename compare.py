@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt #type: ignore
 import glob
 import h5py #type: ignore
 import scipy.interpolate as spi #type: ignore
+import scipy.constants as sc #type: ignore
 
 path = '/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/'
 abmod_files = glob.glob('/home/hakon/Documents/abmod/runs/run_ 500_*.txt')
@@ -11,7 +12,7 @@ files = glob.glob(path + "*.h5")
 files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_0_30.h5')
 files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_30_60.h5')
 files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_60_90.h5')
-print(files)
+
 abmod_vs = [int(f[41+m_add:43+m_add]) for f in abmod_files]
 abmod_zas = [int(float(f[45+m_add:47+m_add])) for f in abmod_files]
 abmod_vs = np.array(abmod_vs)
@@ -48,6 +49,10 @@ with h5py.File(tf, 'r') as hf:
 
         snr = hf[key][()]
         if v1 == '10':
+
+            #snr = snr*5000*31250*sc.k
+            #snr = snr/(3000*sc.k*500e3)
+
             if drop:
                 ax1.plot(10*np.log10(np.mean(snr, axis=0)), alt, label=f'{v1}_{v2}', color=colors[np.floor(int(v1)/10).astype(int)-1])
             else:
@@ -73,30 +78,25 @@ with h5py.File(tf, 'r') as hf:
 
         f = spi.interp1d(aalt, asnr, kind='linear', fill_value='zero')
         int_snr = f(alt)
-        print(i)
+
         if abmod_v[af] == 15:
             ax1.plot(int_snr, alt, label=abmod_v[af], linestyle='--', color=colors[i])
             ax2.plot(int_snr, alt, label=abmod_v[af], linestyle='--', color=colors[i])
 
 
-
-        
-
-        
-
     fig.suptitle(f'ZA: {tf[tf.find("za")+3:tf.find("za")+8]}')
-ax1.set_xlabel('SNR [dB]')
-ax1.set_ylabel('Altitude [km]')
-ax1.set_title('Drop')
-ax1.legend()
-ax1.set_xlim(-50, 50)
+    ax1.set_xlabel('SNR [dB]')
+    ax1.set_ylabel('Altitude [km]')
+    ax1.set_title('Drop')
+    ax1.legend()
+    ax1.set_xlim(-50, 50)
 
-ax2.set_xlabel('SNR [dB]')
-ax2.set_ylabel('Altitude [km]')
-ax2.set_title('No Drop')
-ax2.legend()
-ax2.set_xlim(-50, 50)
-plt.show()
+    ax2.set_xlabel('SNR [dB]')
+    ax2.set_ylabel('Altitude [km]')
+    ax2.set_title('No Drop')
+    ax2.legend()
+    ax2.set_xlim(-50, 50)
+    plt.savefig(f'za{za1}-{za2}_m{v1}-{v2}_a{abmod_v}.png', dpi=300)
 
 
 

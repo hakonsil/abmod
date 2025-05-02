@@ -16,7 +16,7 @@ files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_pro
 files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_60_90.h5')
 
 
-def compare_snr(za_idx, vel_idx, files, mass='500', uncertainty='', plot=True, combine_drop=False):
+def compare_snr(za_idx, vel_idx, files, mass='500', uncertainty='', plot=True, combine_drop=False, compare_drops=False):
     zas = ['0_', '10', '30', '50', '70']
     vels = ['10', '20', '30', '40', '50', '60']
     v2s = ['20', '30', '40', '50', '60', '73']
@@ -91,7 +91,7 @@ def compare_snr(za_idx, vel_idx, files, mass='500', uncertainty='', plot=True, c
             plt.savefig(f'/home/hakon/Documents/abmod/figs/{mass}/combined_snr_plots/combined_snr_{abmod_zas[za_idx]}_{abmod_vs[vel_idx]}_{mass}.png')
             plt.close()
 
-    if not combine_drop:
+    if not combine_drop and not compare_drops:
         fig = plt.figure(figsize=(16,10))
         ax1 = fig.add_axes([0.05,0.1, 0.42, 0.8])
         ax2 = fig.add_axes([0.55-0.02,0.1,0.42,0.8])
@@ -138,12 +138,49 @@ def compare_snr(za_idx, vel_idx, files, mass='500', uncertainty='', plot=True, c
             plt.close()
         if not plot:
             return {'snr_drop': mean_drop, 'uncertainty_drop': unc_drop, 'snr_nodrop': mean_nodrop, 'uncertainty_nodrop': unc_nodrop, 'alt': alt, 'abmod_snr': abmod_snr}
+    
+    if compare_drops:
+        fig = plt.figure(figsize=(16,10))
+        ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
+        mean_drop = np.mean(drop_snr, axis=0)
+        mean_nodrop = np.mean(nodrop_snr, axis=0)
+
+        ax.plot(10*np.log10(mean_drop), alt, label='Drop', color='blue', linestyle='-')
+        ax.plot(10*np.log10(mean_nodrop), alt, label='No Drop', color='k', linestyle='-')
+        ax.set_xlabel('SNR [dB]')
+        ax.set_ylabel('Altitude [km]')
+        ax.set_title(f'ZA: {abmod_zas[za_idx]} Vel: {abmod_vs[vel_idx]} Mass: {mass} $N_{{drop}}$ = {len(drop_snr)} $N_{{nodrop}}$ = {len(nodrop_snr)}')
+        ax.legend()
+        ax.set_xlim(-50, 50)
+        # if directory does not exist, create it
+        if not os.path.exists(f'/home/hakon/Documents/abmod/figs/drop_nodrop_comparison/'):
+            os.makedirs(f'/home/hakon/Documents/abmod/figs/drop_nodrop_comparison/')
+        plt.savefig(f'/home/hakon/Documents/abmod/figs/drop_nodrop_comparison/snr_{abmod_zas[za_idx]}_{abmod_vs[vel_idx]}.png')
+        plt.close()
 
 
+
+
+m001=[".01", ".02", ".03", ".04", ".05", ".06", ".07", ".08", ".09"]
+m01=[".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9"]
+m1=["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+m10=["10", "20", "30", "40", "50", "60", "70", "80", "90"]
+m100=["100", "200", "300", "400", "500", "600", "700", "800", "900"]
+masses = m001 + m01 + m1 + m10 + m100
 for zi in range(5):
     for vi in range(6):
-        compare_snr(zi, vi, files, mass='500', uncertainty='SE', plot=True, combine_drop=True)
-        compare_snr(zi, vi, files, mass='500', uncertainty='SE', plot=True, combine_drop=False)
-        compare_snr(zi, vi, files, mass='1', uncertainty='SE', plot=True, combine_drop=True)
-        compare_snr(zi, vi, files, mass='1', uncertainty='SE', plot=True, combine_drop=False)
+        try:
+            compare_snr(zi, vi, files, compare_drops=True)
+        except Exception as e:
+            print(e)
+            continue
+        for m in masses:
+            try:
+                compare_snr(zi, vi, files, mass=m, uncertainty='SE', plot=True, combine_drop=True)
+                compare_snr(zi, vi, files, mass=m, uncertainty='SE', plot=True, combine_drop=False)
+            except Exception as e:
+                print(f'Error in mass {m} for ZA: {zi} Vel: {vi}')
+                print(e)
+                continue
+
 

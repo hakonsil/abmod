@@ -137,7 +137,10 @@ def compare_snr(za_idx, vel_idx, files, mass='500', uncertainty='', plot=True, c
             plt.savefig(f'/home/hakon/Documents/abmod/figs/{mass}/snr_plots/snr_{abmod_zas[za_idx]}_{abmod_vs[vel_idx]}_{mass}.png')
             plt.close()
         if not plot:
-            return {'snr_drop': mean_drop, 'uncertainty_drop': unc_drop, 'snr_nodrop': mean_nodrop, 'uncertainty_nodrop': unc_nodrop, 'alt': alt, 'abmod_snr': abmod_snr}
+            plt.close()
+            return {'snr_drop': drop_snr, 'uncertainty_drop': unc_drop,
+                    'snr_nodrop': nodrop_snr, 'uncertainty_nodrop': unc_nodrop, 
+                    'alt': alt, 'abmod_snr': abmod_snr, 'mean_drop': mean_drop, 'mean_nodrop': mean_nodrop}
     
     if compare_drops:
         fig = plt.figure(figsize=(16,10))
@@ -159,28 +162,79 @@ def compare_snr(za_idx, vel_idx, files, mass='500', uncertainty='', plot=True, c
         plt.close()
 
 
-
-
 m001=[".01", ".02", ".03", ".04", ".05", ".06", ".07", ".08", ".09"]
 m01=[".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9"]
 m1=["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 m10=["10", "20", "30", "40", "50", "60", "70", "80", "90"]
 m100=["100", "200", "300", "400", "500", "600", "700", "800", "900"]
 masses = m001 + m01 + m1 + m10 + m100
-for zi in range(5):
-    for vi in range(6):
-        try:
-            compare_snr(zi, vi, files, compare_drops=True)
-        except Exception as e:
-            print(e)
-            continue
-        for m in masses:
+if False:
+    for zi in range(5):
+        for vi in range(6):
             try:
-                compare_snr(zi, vi, files, mass=m, uncertainty='SE', plot=True, combine_drop=True)
-                compare_snr(zi, vi, files, mass=m, uncertainty='SE', plot=True, combine_drop=False)
+                compare_snr(zi, vi, files, compare_drops=True)
             except Exception as e:
-                print(f'Error in mass {m} for ZA: {zi} Vel: {vi}')
                 print(e)
                 continue
+            for m in masses:
+                try:
+                    compare_snr(zi, vi, files, mass=m, uncertainty='SE', plot=True, combine_drop=True)
+                    compare_snr(zi, vi, files, mass=m, uncertainty='SE', plot=True, combine_drop=False)
+                except Exception as e:
+                    print(f'Error in mass {m} for ZA: {zi} Vel: {vi}')
+                    print(e)
+                    continue
+
+#{'snr_drop': mean_drop, 'uncertainty_drop': unc_drop, 'snr_nodrop': mean_nodrop,
+#'uncertainty_nodrop': unc_nodrop, 'alt': alt, 'abmod_snr': abmod_snr}
+
+all_drop = np.zeros((1,61))
+all_nodrop = np.zeros((1,61))
+if True:
+    for zi in range(5):
+        for vi in range(6):
+            try:
+                snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)
+                drop = snr_dict['snr_drop']
+                nodrop = snr_dict['snr_nodrop']
+                all_drop = np.concatenate((all_drop, drop), axis=0)
+                all_nodrop = np.concatenate((all_nodrop, nodrop), axis=0)
+                alt = snr_dict['alt']
+            except Exception as e:
+                continue
+
+    all_drop = all_drop[1:,:]
+    all_nodrop = all_nodrop[1:,:]
+    mean_drop = np.mean(all_drop, axis=0)
+    mean_nodrop = np.mean(all_nodrop, axis=0)
+    se_drop = np.std(all_drop, axis=0)/np.sqrt(len(all_drop))
+    se_nodrop = np.std(all_nodrop, axis=0)/np.sqrt(len(all_nodrop))
+    fig = plt.figure(figsize=(16,10))
+    ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
+    ax.plot(10*np.log10(mean_drop), alt, label='Drop', color='blue', linestyle='-')
+    ax.fill_betweenx(alt, 10*np.log10(mean_drop-se_drop), 10*np.log10(mean_drop+se_drop), color='blue', alpha=0.2, label='SE')
+    ax.plot(10*np.log10(mean_nodrop), alt, label='No Drop', color='k', linestyle='-')
+    ax.fill_betweenx(alt, 10*np.log10(mean_nodrop-se_nodrop), 10*np.log10(mean_nodrop+se_nodrop), color='k', alpha=0.2, label='SE')
+    ax.set_xlabel('SNR [dB]')
+    ax.set_ylabel('Altitude [km]')
+    ax.set_title(f'All meteors')
+    ax.legend()
+    ax.set_xlim(-50, 50)
+    plt.show()
+
+    all_meteors = np.concatenate((all_drop, all_nodrop), axis=0)
+    mean_all = np.mean(all_meteors, axis=0)
+    se_all = np.std(all_meteors, axis=0)/np.sqrt(len(all_meteors))
+    fig = plt.figure(figsize=(16,10))
+    ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
+    ax.plot(10*np.log10(mean_all), alt, label='All meteors', color='k', linestyle='-')
+    ax.fill_betweenx(alt, 10*np.log10(mean_all-se_all), 10*np.log10(mean_all+se_all), color='k', alpha=0.2, label='SE')
+    ax.set_xlabel('SNR [dB]')
+    ax.set_ylabel('Altitude [km]')
+    ax.set_title(f'All meteors')
+    ax.legend()
+    ax.set_xlim(-50, 50)
+    plt.show()
+
 
 

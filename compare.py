@@ -5,6 +5,7 @@ import h5py #type: ignore
 import scipy.interpolate as spi #type: ignore
 import scipy.constants as sc #type: ignore
 import os
+from tqdm import tqdm #type: ignore
 
 path = '/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/'
 abmod_files = glob.glob('/home/hakon/Documents/abmod/runs/run_ 1*.txt')
@@ -191,20 +192,24 @@ if False:
 all_drop = np.zeros((1,61))
 all_nodrop = np.zeros((1,61))
 if True:
-    for zi in range(5):
-        for vi in range(6):
-            try:
-                snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)
-                drop = snr_dict['snr_drop']
-                nodrop = snr_dict['snr_nodrop']
-                all_drop = np.concatenate((all_drop, drop), axis=0)
-                all_nodrop = np.concatenate((all_nodrop, nodrop), axis=0)
-                alt = snr_dict['alt']
-            except Exception as e:
-                continue
+    #for zi in range(5):
+    #for vi in range(6):
+    zi=3
+    vi=5
+    try:
+        snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)
+        drop = snr_dict['snr_drop']
+        nodrop = snr_dict['snr_nodrop']
+        all_drop = np.concatenate((all_drop, drop), axis=0)
+        all_nodrop = np.concatenate((all_nodrop, nodrop), axis=0)
+        alt = snr_dict['alt']
+    except Exception as e:
+        pass
 
     all_drop = all_drop[1:,:]
     all_nodrop = all_nodrop[1:,:]
+    print(all_drop.shape)
+    print(all_nodrop.shape)
     mean_drop = np.mean(all_drop, axis=0)
     mean_nodrop = np.mean(all_nodrop, axis=0)
     se_drop = np.std(all_drop, axis=0)/np.sqrt(len(all_drop))
@@ -235,6 +240,17 @@ if True:
     ax.legend()
     ax.set_xlim(-50, 50)
     plt.show()
+
+    fig = plt.figure(figsize=(16,10))
+    ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
+    for i in tqdm(range(len(all_nodrop))):
+        ax.plot(10*np.log10(all_nodrop[i]), alt, color='k', alpha=0.1)
+    ax.set_xlabel('SNR [dB]')
+    ax.set_ylabel('Altitude [km]')
+    ax.set_title(f'All meteors')
+    ax.set_xlim(0, 100)
+    plt.show()
+    plt.close()
 
 
 

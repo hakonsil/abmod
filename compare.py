@@ -210,7 +210,7 @@ if True:
     all_nodrop = all_nodrop[1:,:]
     # remove outlier by zeroing out the top 3 values at each altitude
     for i in range(61):
-        for j in range(3):
+        for j in range(2):
             max_arg = np.argmax(all_drop[:,i])
             all_drop[max_arg,i] = 0
             max_arg = np.argmax(all_nodrop[:,i])
@@ -224,9 +224,9 @@ if True:
     fig = plt.figure(figsize=(16,10))
     ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
     ax.plot(10*np.log10(mean_drop), alt, label='Drop', color='blue', linestyle='-')
-    ax.fill_betweenx(alt, 10*np.log10(mean_drop-se_drop), 10*np.log10(mean_drop+se_drop), color='blue', alpha=0.2, label='SE')
+    ax.fill_betweenx(alt, 10*np.log10(mean_drop-se_drop), 10*np.log10(mean_drop+se_drop), color='blue', alpha=0.2, label='95% CI')
     ax.plot(10*np.log10(mean_nodrop), alt, label='No Drop', color='k', linestyle='-')
-    ax.fill_betweenx(alt, 10*np.log10(mean_nodrop-se_nodrop), 10*np.log10(mean_nodrop+se_nodrop), color='k', alpha=0.2, label='SE')
+    ax.fill_betweenx(alt, 10*np.log10(mean_nodrop-se_nodrop), 10*np.log10(mean_nodrop+se_nodrop), color='k', alpha=0.2, label='95% CI')
     ax.set_xlabel('SNR [dB]')
     ax.set_ylabel('Altitude [km]')
     ax.set_title(f'All meteors')
@@ -249,7 +249,7 @@ if True:
     plt.show()
 
 
-    """fig = plt.figure(figsize=(16,10))
+    fig = plt.figure(figsize=(16,10))
     ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
     for i in tqdm(range(len(all_nodrop))):
         ax.plot(10*np.log10(all_nodrop[i]), alt, color='k', alpha=0.1)
@@ -258,6 +258,23 @@ if True:
     ax.set_title(f'All meteors')
     ax.set_xlim(0, 100)
     plt.show()
-    plt.close()"""
+    plt.close()
+
+    # create a histogram of how many detections there are at each altitude
+    altitudes = []
+    for i in range(len(all_drop)):
+        for j in range(len(all_drop[i])):
+            if all_drop[i][j] > 0:
+                altitudes.append(alt[j])
+    altitudes = np.array(altitudes)
+    fig = plt.figure(figsize=(16,10))
+    ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
+    lab = np.unique(altitudes)
+    ax.hist(altitudes, bins=len(lab), color='k', alpha=1, orientation='horizontal')
+    ax.set_ylabel('Altitude [km]')
+    ax.set_xlabel('Number of detections')
+    ax.set_title(f'All meteors')
+
+    plt.show()
 
 

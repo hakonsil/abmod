@@ -205,15 +205,22 @@ if True:
         alt = snr_dict['alt']
     except Exception as e:
         pass
-
+    
     all_drop = all_drop[1:,:]
     all_nodrop = all_nodrop[1:,:]
+    # remove outlier by zeroing out the top 3 values at each altitude
+    for i in range(61):
+        for j in range(3):
+            max_arg = np.argmax(all_drop[:,i])
+            all_drop[max_arg,i] = 0
+            max_arg = np.argmax(all_nodrop[:,i])
+            all_nodrop[max_arg,i] = 0
     print(all_drop.shape)
     print(all_nodrop.shape)
     mean_drop = np.mean(all_drop, axis=0)
     mean_nodrop = np.mean(all_nodrop, axis=0)
-    se_drop = np.std(all_drop, axis=0)/np.sqrt(len(all_drop))
-    se_nodrop = np.std(all_nodrop, axis=0)/np.sqrt(len(all_nodrop))
+    se_drop = 1.96*np.std(all_drop, axis=0)/np.sqrt(len(all_drop))
+    se_nodrop = 1.96*np.std(all_nodrop, axis=0)/np.sqrt(len(all_drop))
     fig = plt.figure(figsize=(16,10))
     ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
     ax.plot(10*np.log10(mean_drop), alt, label='Drop', color='blue', linestyle='-')
@@ -229,7 +236,7 @@ if True:
 
     all_meteors = np.concatenate((all_drop, all_nodrop), axis=0)
     mean_all = np.mean(all_meteors, axis=0)
-    se_all = np.std(all_meteors, axis=0)/np.sqrt(len(all_meteors))
+    se_all = 1.96*np.std(all_meteors, axis=0)/np.sqrt(len(all_meteors))
     fig = plt.figure(figsize=(16,10))
     ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
     ax.plot(10*np.log10(mean_all), alt, label='All meteors', color='k', linestyle='-')
@@ -241,7 +248,8 @@ if True:
     ax.set_xlim(-50, 50)
     plt.show()
 
-    fig = plt.figure(figsize=(16,10))
+
+    """fig = plt.figure(figsize=(16,10))
     ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
     for i in tqdm(range(len(all_nodrop))):
         ax.plot(10*np.log10(all_nodrop[i]), alt, color='k', alpha=0.1)
@@ -250,7 +258,6 @@ if True:
     ax.set_title(f'All meteors')
     ax.set_xlim(0, 100)
     plt.show()
-    plt.close()
-
+    plt.close()"""
 
 

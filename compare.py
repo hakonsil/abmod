@@ -270,7 +270,8 @@ if True:
         alt_2d[i] = alt
 
     fig = plt.figure(figsize=(16,10))
-    ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
+    ax1 = fig.add_axes([0.05,0.1, 0.42, 0.8])
+    ax2 = fig.add_axes([0.55-0.02,0.1,0.42,0.8])
 
     snr = 10*np.log10(all_nodrop.flatten())
     # set -inf to nan
@@ -281,13 +282,36 @@ if True:
     snr = snr[~np.isnan(snr)]
     
     y_bins = len(np.unique(alt_2d))
-    h = ax.hist2d(snr, alt_2d, bins=[100, y_bins], norm='log', cmap='viridis')
-    ax.set_xlabel('SNR [dB]')
-    ax.set_ylabel('Altitude [km]')
-    ax.set_title(f'All meteors')
-    ax.set_xlim(15, 77)
-    ax.set_ylim(88, 129)
-    plt.colorbar(h[3], ax=ax)
+    h = ax2.hist2d(snr, alt_2d, bins=[100, y_bins], norm='log', cmap='viridis')
+    ax2.set_xlabel('SNR [dB]')
+    ax2.set_ylabel('Altitude [km]')
+    ax2.set_title(f'Nodrop')
+    ax2.set_xlim(15, 77)
+    ax2.set_ylim(88, 129)
+    cbar = fig.colorbar(h[3], ax=ax2)
+    cbar.set_label('Counts')
+
+    
+    snr = 10*np.log10(all_drop.flatten())
+    # set -inf to nan
+    snr[np.isneginf(snr)] = np.nan
+    # remove nan values
+    alt_2d = np.zeros((len(all_drop), len(alt)))
+    for i in range(len(all_drop)):
+        alt_2d[i] = alt
+    alt_2d = alt_2d.flatten()
+    alt_2d = alt_2d[~np.isnan(snr)]
+    snr = snr[~np.isnan(snr)]
+    y_bins = len(np.unique(alt_2d))
+    h = ax1.hist2d(snr, alt_2d, bins=[100, y_bins], norm='log', cmap='viridis')
+    ax1.set_xlabel('SNR [dB]')
+    ax1.set_ylabel('Altitude [km]')
+    ax1.set_title(f'Drop')
+    ax1.set_xlim(15, 77)
+    ax1.set_ylim(88, 129)
+    # add colorbar
+    cbar = fig.colorbar(h[3], ax=ax1)
+    cbar.set_label('Counts')
     plt.show()
     
 

@@ -252,7 +252,7 @@ if True:
 
 
 
-    fig = plt.figure(figsize=(16,10))
+    """fig = plt.figure(figsize=(16,10))
     ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
     for i in tqdm(range(len(all_nodrop))):
         ax.plot(10*np.log10(all_nodrop[i]), alt, color='k', alpha=0.1)
@@ -261,23 +261,34 @@ if True:
     ax.set_title(f'All meteors')
     ax.set_xlim(0, 100)
     plt.show()
-    plt.close()
+    plt.close()"""
 
-    # create a histogram of how many detections there are at each altitude
-    altitudes = []
-    for i in range(len(all_drop)):
-        for j in range(len(all_drop[i])):
-            if all_drop[i][j] > 0:
-                altitudes.append(alt[j])
-    altitudes = np.array(altitudes)
+    #create a 2d histogram with snr on x axis and altitude on y axis
+    # need to duplicate alt len(all_nodrop) times
+    alt_2d = np.zeros((len(all_nodrop), len(alt)))
+    for i in range(len(all_nodrop)):
+        alt_2d[i] = alt
+
     fig = plt.figure(figsize=(16,10))
     ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
-    lab = np.unique(altitudes)
-    ax.hist(altitudes, bins=len(lab), color='k', alpha=1, orientation='horizontal')
-    ax.set_ylabel('Altitude [km]')
-    ax.set_xlabel('Number of detections')
-    ax.set_title(f'All meteors')
 
+    snr = 10*np.log10(all_nodrop.flatten())
+    # set -inf to nan
+    snr[np.isneginf(snr)] = np.nan
+    # remove nan values
+    alt_2d = alt_2d.flatten()
+    alt_2d = alt_2d[~np.isnan(snr)]
+    snr = snr[~np.isnan(snr)]
+    
+    y_bins = len(np.unique(alt_2d))
+    h = ax.hist2d(snr, alt_2d, bins=[100, y_bins], norm='log', cmap='viridis')
+    ax.set_xlabel('SNR [dB]')
+    ax.set_ylabel('Altitude [km]')
+    ax.set_title(f'All meteors')
+    ax.set_xlim(15, 77)
+    ax.set_ylim(88, 129)
+    plt.colorbar(h[3], ax=ax)
     plt.show()
+    
 
 

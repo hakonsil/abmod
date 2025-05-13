@@ -6,6 +6,32 @@ import scipy.interpolate as spi #type: ignore
 import scipy.constants as sc #type: ignore
 import os
 from tqdm import tqdm #type: ignore
+import matplotlib.lines as mlines
+plt.rcParams.update({'font.family': 'serif',
+                    'font.size': 12*2,
+                    'axes.labelsize': 12*2,
+                    'xtick.labelsize': 11*2,
+                    'ytick.labelsize': 11*2,
+                    'legend.fontsize': 12*2,
+                    'figure.titlesize': 12*2
+})
+fig_width=6.733*2
+ls_d = 'solid'
+ls_nd = 'solid'
+ls_mod = 'dashed'
+c_d = 'red'
+c_nd = 'k'
+c_mod = 'blue'
+error_alpha=0.2
+lw= 2
+abmod_line = mlines.Line2D([],[],color=c_mod, linestyle=ls_mod,markersize=8,label='Model')
+nodrop_line = mlines.Line2D([],[],color=c_nd, linestyle=ls_d,markersize=8,label='No SNR drop')
+drop_line = mlines.Line2D([],[],color=c_d, linestyle=ls_nd,markersize=8,label='SNR drop')
+abmod_error = mlines.Line2D([],[],color=c_mod, linestyle='solid',markersize=8,linewidth=13, label='95% CI',alpha=error_alpha)
+nodrop_error = mlines.Line2D([],[],color=c_nd, linestyle='solid',markersize=8,linewidth=13, label='95% CI',alpha=error_alpha)
+drop_error = mlines.Line2D([],[],color=c_d, linestyle='solid',markersize=8,linewidth=13, label='95% CI',alpha=error_alpha)
+
+
 
 path = '/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/'
 abmod_files = glob.glob('/home/hakon/Documents/abmod/runs/run_ 1*.txt')
@@ -191,26 +217,26 @@ if False:
 
 all_drop = np.zeros((1,61))
 all_nodrop = np.zeros((1,61))
-if True:
-    #for zi in range(5):
-    #for vi in range(6):
-    zi=3
-    vi=5
-    try:
-        snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)
-        drop = snr_dict['snr_drop']
-        nodrop = snr_dict['snr_nodrop']
-        all_drop = np.concatenate((all_drop, drop), axis=0)
-        all_nodrop = np.concatenate((all_nodrop, nodrop), axis=0)
-        alt = snr_dict['alt']
-    except Exception as e:
-        pass
+if False:
+    for zi in range(5):
+        for vi in range(6):
+            #zi=3
+            #vi=5
+            try:
+                snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)
+                drop = snr_dict['snr_drop']
+                nodrop = snr_dict['snr_nodrop']
+                all_drop = np.concatenate((all_drop, drop), axis=0)
+                all_nodrop = np.concatenate((all_nodrop, nodrop), axis=0)
+                alt = snr_dict['alt']
+            except Exception as e:
+                pass
     
     all_drop = all_drop[1:,:]
     all_nodrop = all_nodrop[1:,:]
     # remove outlier by zeroing out the top 3 values at each altitude
     for i in range(61):
-        for j in range(2):
+        for j in range(3):
             max_arg = np.argmax(all_drop[:,i])
             all_drop[max_arg,i] = 0
             max_arg = np.argmax(all_nodrop[:,i])
@@ -221,17 +247,18 @@ if True:
     mean_nodrop = np.mean(all_nodrop, axis=0)
     se_drop = 1.96*np.std(all_drop, axis=0)/np.sqrt(len(all_drop))
     se_nodrop = 1.96*np.std(all_nodrop, axis=0)/np.sqrt(len(all_drop))
-    fig = plt.figure(figsize=(16,10))
-    ax = fig.add_axes([0.05,0.1, 0.9, 0.8])
-    ax.plot(10*np.log10(mean_drop), alt, label='Drop', color='blue', linestyle='-')
-    ax.fill_betweenx(alt, 10*np.log10(mean_drop-se_drop), 10*np.log10(mean_drop+se_drop), color='blue', alpha=0.2, label='95% CI')
+    fig = plt.figure(figsize=(fig_width,10))
+    ax = fig.add_axes([0.1,0.1,0.84,0.7])
+    ax.plot(10*np.log10(mean_drop), alt, label='Drop', color=c_d, linestyle=ls_d)
+    ax.fill_betweenx(alt, 10*np.log10(mean_drop-se_drop), 10*np.log10(mean_drop+se_drop), color=c_d, ls=ls_d, alpha=error_alpha, label='95% CI')
     ax.plot(10*np.log10(mean_nodrop), alt, label='No Drop', color='k', linestyle='-')
-    ax.fill_betweenx(alt, 10*np.log10(mean_nodrop-se_nodrop), 10*np.log10(mean_nodrop+se_nodrop), color='k', alpha=0.2, label='95% CI')
-    ax.set_xlabel('SNR [dB]')
-    ax.set_ylabel('Altitude [km]')
-    ax.set_title(f'All meteors')
-    ax.legend()
+    ax.fill_betweenx(alt, 10*np.log10(mean_nodrop-se_nodrop), 10*np.log10(mean_nodrop+se_nodrop), color=c_nd, ls=ls_nd,alpha=error_alpha, label='95% CI')
+    ax.set_xlabel('SNR (dB)',loc='right')
+    ax.set_ylabel('Altitude (km)',loc='top')
+    ax.legend(handles=[nodrop_line, nodrop_error,drop_line,drop_error], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=2,borderaxespad=0.0,handletextpad=0.3)
     ax.set_xlim(-50, 50)
+    #plt.savefig('/home/hakon/Documents/abmod/new_imgs/mean_profile_d_nd',dpi=300)
+    #plt.close()
     plt.show()
 
     all_meteors = np.concatenate((all_drop, all_nodrop), axis=0)
@@ -315,4 +342,49 @@ if True:
     plt.show()
     
 
+if True:
+    vels = ['10', '20', '30', '40', '50', '60']
+    v2s = ['20', '30', '40', '50', '60', '73']
+    zas = ['0', '10', '30', '50', '70','90']
+    for zi in range(5):
+        fig = plt.figure(figsize=(fig_width,10))
+        ax = fig.add_axes([0.1,0.1,0.84,0.7])
+        handles = []
+        #ax.plot(10*np.log10(mean_drop), alt, label='Drop', color=c_d, linestyle=ls_d)
 
+        for vi in range(6):
+            #zi=3
+            #vi=5
+            try:
+                snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)
+                drop = snr_dict['snr_drop']
+                nodrop = snr_dict['snr_nodrop']
+                alt = snr_dict['alt']
+            except Exception as e:
+                pass
+    
+            snr = np.concatenate((drop,nodrop),axis=0)
+            # remove outlier by zeroing out the top 3 values at each altitude
+            remove = 5
+            for i in range(61):
+                for j in range(remove):
+                    max_arg = np.argmax(snr[:,i])
+                    snr[max_arg,i] = 0
+            n_snr = (len(snr)-remove)
+            mean_snr = np.sum(snr,axis=0)/n_snr
+            snr_std = np.std(snr,axis=0,ddof=remove)
+            snr_ci =1.96*snr_std/np.sqrt(n_snr-remove)
+            ax.plot(10*np.log10(mean_snr),alt,label=f'({vels[vi]},{v2s[vi]})',linestyle='solid',color=(1-vi/5,0,0))
+            handles.append(mlines.Line2D([],[],color=(1-vi/5,0,0), linestyle='solid', markersize=8, label=f'v$\in$({vels[vi]},{v2s[vi]})'))
+            #ax.fill_betweenx(alt, 10*np.log10(mean_snr-snr_ci), 10*np.log10(mean_snr+snr_ci), color=c_d, ls=ls_d, alpha=error_alpha, label='95% CI')
+        ax.set_xlabel('SNR (dB)',loc='right')
+        ax.set_ylabel('Altitude (km)',loc='top')
+        ax.legend(handles=handles, loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=3,borderaxespad=0.0,handletextpad=0.3)
+        ax.set_xlim(-50, 50)
+        plt.text(30,125,f'ZA$\in$({zas[zi]},{zas[zi+1]})')
+
+        plt.show()
+            
+                    
+            
+        

@@ -356,9 +356,10 @@ if True:
             #zi=3
             #vi=5
             try:
-                snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)
+                snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False,mass='40')
                 drop = snr_dict['snr_drop']
                 nodrop = snr_dict['snr_nodrop']
+                abmod_snr = snr_dict['abmod_snr']
                 alt = snr_dict['alt']
             except Exception as e:
                 pass
@@ -371,10 +372,12 @@ if True:
                     max_arg = np.argmax(snr[:,i])
                     snr[max_arg,i] = 0
             n_snr = (len(snr)-remove)
+            print(n_snr)
             mean_snr = np.sum(snr,axis=0)/n_snr
             snr_std = np.std(snr,axis=0,ddof=remove)
             snr_ci =1.96*snr_std/np.sqrt(n_snr-remove)
-            ax.plot(10*np.log10(mean_snr),alt,label=f'({vels[vi]},{v2s[vi]})',linestyle='solid',color=(1-vi/5,0,0))
+            ax.plot(10*np.log10(mean_snr),alt,label=f'({vels[vi]},{v2s[vi]})',linestyle='solid',color=(1-vi/6,0,0),linewidth=lw)
+            ax.plot(abmod_snr,alt,label='Abmod',linestyle='dashed',color=(0,0,1-vi/5),linewidth=lw)
             handles.append(mlines.Line2D([],[],color=(1-vi/5,0,0), linestyle='solid', markersize=8, label=f'v$\in$({vels[vi]},{v2s[vi]})'))
             #ax.fill_betweenx(alt, 10*np.log10(mean_snr-snr_ci), 10*np.log10(mean_snr+snr_ci), color=c_d, ls=ls_d, alpha=error_alpha, label='95% CI')
         ax.set_xlabel('SNR (dB)',loc='right')
@@ -382,7 +385,6 @@ if True:
         ax.legend(handles=handles, loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=3,borderaxespad=0.0,handletextpad=0.3)
         ax.set_xlim(-50, 50)
         plt.text(30,125,f'ZA$\in$({zas[zi]},{zas[zi+1]})')
-
         plt.show()
             
                     

@@ -260,6 +260,7 @@ if True:
     ax.set_ylabel('Altitude (km)',loc='top')
     ax.legend(handles=[nodrop_line, nodrop_error,drop_line,drop_error], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=2,borderaxespad=0.0,handletextpad=0.3)
     ax.set_xlim(-50, 50)
+    ax.tick_params(direction='in')
     plt.savefig('/home/hakon/Documents/abmod/new_imgs/mean_profile_d_nd',dpi=300)
     plt.close()
     #plt.show()

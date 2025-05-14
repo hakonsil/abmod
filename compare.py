@@ -26,6 +26,7 @@ error_alpha=0.2
 lw= 2
 abmod_line = mlines.Line2D([],[],color=c_mod, linestyle=ls_mod,markersize=8,label='Model')
 nodrop_line = mlines.Line2D([],[],color=c_nd, linestyle=ls_d,markersize=8,label='No SNR drop')
+all_line = mlines.Line2D([],[],color=c_nd, linestyle=ls_d,markersize=8,label='MAARSY')
 drop_line = mlines.Line2D([],[],color=c_d, linestyle=ls_nd,markersize=8,label='SNR drop')
 abmod_error = mlines.Line2D([],[],color=c_mod, linestyle='solid',markersize=8,linewidth=13, label='95% CI',alpha=error_alpha)
 nodrop_error = mlines.Line2D([],[],color=c_nd, linestyle='solid',markersize=8,linewidth=13, label='95% CI',alpha=error_alpha)
@@ -411,72 +412,136 @@ if False:
     ax.set_xlim(-50, 50)
     plt.show()
             
-if True:
+
+################################################################
+def compare_all():
     vels = ['10', '20', '30', '40', '50', '60']
     v2s = ['20', '30', '40', '50', '60', '73']
     zas = ['0', '10', '30', '50', '70','90']
-    abmod_masses_snr = np.zeros((1,61))
-    for m in tqdm(masses):
-        all_abmod = np.zeros((1,61))
-        all_snr = np.zeros((1,61))
-        for zi in range(5):
-            for vi in range(6):
+    with h5py.File('/home/hakon/Documents/abmod/counts.h5', 'r') as hf:
+        counts = hf['counts'][()]
+    all_abmod = np.zeros((1,61))
+    all_snr = np.zeros((1,61))
+
+    for zi in tqdm(range(5)):
+        for vi in range(6):
+            for mi in range(45):
                 try:
-                    snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False,mass=m)
-                    drop = snr_dict['snr_drop']
-                    nodrop = snr_dict['snr_nodrop']
+                    snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False,mass=masses[mi])
                     abmod_snr = snr_dict['abmod_snr']
-                    alt = snr_dict['alt']
+                    if mi == 0:
+                        drop = snr_dict['snr_drop']
+                        nodrop = snr_dict['snr_nodrop']
+                        alt = snr_dict['alt']
+                        snr = np.concatenate((drop,nodrop),axis=0)
+                        all_snr = np.concatenate((all_snr, snr), axis=0)
+                    
                 except Exception as e:
                     pass
         
-                snr = np.concatenate((drop,nodrop),axis=0)
-                # remove outlier by zeroing out the top 3 values at each altitude
-                remove = 5
-                for i in range(61):
-                    for j in range(remove):
-                        max_arg = np.argmax(snr[:,i])
-                        snr[max_arg,i] = 0
-                n_snr = (len(snr)-remove)
-                mean_snr = np.sum(snr,axis=0)/n_snr
-                snr_std = np.std(snr,axis=0,ddof=remove)
-                snr_ci =1.96*snr_std/np.sqrt(n_snr-remove)
-                #reshape abmod_snr to have same shape as all_abmod
-                abmod_snr_c = np.reshape(abmod_snr, (1,61))
-                mean_snr_c = np.reshape(mean_snr, (1,61))
-                all_abmod = np.concatenate((all_abmod, 10**(abmod_snr_c/10)), axis=0)
-                all_snr = np.concatenate((all_snr,mean_snr_c), axis=0)
+                
+                abmod_snr = (10**(abmod_snr/10)*sc.k*3000*31250/(sc.k*31250*5000))*counts[vi][zi][mi]
+                abmod_snr = np.reshape(abmod_snr, (1,61))
+                all_abmod = np.concatenate((all_abmod,abmod_snr), axis=0)
+                    
 
                 
         all_abmod = all_abmod[1:,:]
         all_snr = all_snr[1:,:]
-        mean_abmod = np.mean(all_abmod, axis=0)
-        mean_snr = np.mean(all_snr, axis=0)
-        mean_abmod = mean_abmod*sc.k*3000*31250/(sc.k*31250*5000)
-        mean_abmod = np.reshape(mean_abmod, (1,61))
-        abmod_masses_snr = np.concatenate((abmod_masses_snr, mean_abmod), axis=0)
-    print(abmod_masses_snr.shape)
-    abmod_masses_snr = abmod_masses_snr[1:,:]
-    # create a weight array of length 45 wchich is a normal distribution with a peak in the middle
-    masses = np.array(masses)
-    print(masses)
-    weights = np.zeros((45))
-    for i in range(45):
-        weights[i] = np.exp(-((i-30)**2)/(2*8**2))/np.sqrt(2*np.pi*8**2)
-    # normalize weights to sum to 1
-    weights = weights/np.sum(weights)
-    plt.plot(weights)
-    plt.show()
+        mean_abmod = np.sum(all_abmod, axis=0)/np.sum(counts)
+        #remove outlier by zeroing out the top 3 values at each altitude
+        remove = 5
+        for i in range(61):
+            for j in range(remove):
+                max_arg = np.argmax(all_snr[:,i])
+                all_snr[max_arg,i] = 0
+        n_snr = (len(all_snr)-remove)
+        mean_snr = np.sum(all_snr,axis=0)/n_snr
+        ci_snr = 1.96*np.std(all_snr,axis=0)/np.sqrt(n_snr-remove)
     
-    mean_abmod = np.average(abmod_masses_snr, axis=0, weights=weights)
+        
 
     fig = plt.figure(figsize=(fig_width,10))
     ax = fig.add_axes([0.1,0.1,0.84,0.7])
     ax.plot(10*np.log10(mean_snr), alt, label='Drop', color=c_nd, linestyle=ls_d)
+    ax.fill_betweenx(alt, 10*np.log10(mean_snr-ci_snr), 10*np.log10(mean_snr+ci_snr), color=c_nd, ls=ls_d, alpha=error_alpha, label='95% CI')
     ax.plot(10*np.log10(mean_abmod), alt, label='Abmod', color=c_mod, linestyle=ls_mod)
     ax.set_xlabel('SNR (dB)',loc='right')
     ax.set_ylabel('Altitude (km)',loc='top')
-    ax.legend(handles=[nodrop_line,abmod_line], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=2,borderaxespad=0.0,handletextpad=0.3)
+    ax.legend(handles=[nodrop_line,nodrop_error,abmod_line], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=3,borderaxespad=0.0,handletextpad=0.3)
     ax.set_xlim(-50, 50)
+    ax.tick_params(direction='in')
     plt.savefig('/home/hakon/Documents/abmod/new_imgs/compare_all',dpi=300)
     plt.close()
+
+def compare_vels():
+    vels = ['10', '20', '30', '40', '50', '60']
+    v2s = ['20', '30', '40', '50', '60', '73']
+    zas = ['0', '10', '30', '50', '70','90']
+    with h5py.File('/home/hakon/Documents/abmod/counts.h5', 'r') as hf:
+        counts = hf['counts'][()]
+
+
+    for zi in tqdm(range(5)):
+        fig = plt.figure(figsize=(fig_width,10))
+        ax = fig.add_axes([0.1,0.1,0.7,0.85])
+        handles = []
+        handles_mod = []
+        for vi in range(6):
+            all_abmod = np.zeros((1,61))
+            all_snr = np.zeros((1,61))
+            vel_masses = []
+            for mi in range(45):
+                try:
+                    snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False,mass=masses[mi])
+                    abmod_snr = snr_dict['abmod_snr']
+                    if mi == 0:
+                        drop = snr_dict['snr_drop']
+                        nodrop = snr_dict['snr_nodrop']
+                        alt = snr_dict['alt']
+                        snr = np.concatenate((drop,nodrop),axis=0)
+                        all_snr = np.concatenate((all_snr, snr), axis=0)
+                    
+                except Exception as e:
+                    pass
+        
+                vel_masses.append(float(masses[mi])*counts[vi][zi][mi])
+                abmod_snr = (10**(abmod_snr/10)*sc.k*3000*31250/(sc.k*31250*5000))*counts[vi][zi][mi]
+                abmod_snr = np.reshape(abmod_snr, (1,61))
+                all_abmod = np.concatenate((all_abmod,abmod_snr), axis=0)
+                    
+
+                
+            all_abmod = all_abmod[1:,:]
+            all_snr = all_snr[1:,:]
+            mean_abmod = np.sum(all_abmod, axis=0)/np.sum(counts[vi][zi])
+            mean_mass = np.sum(vel_masses)/np.sum(counts[vi][zi])
+            #remove outlier by zeroing out the top 3 values at each altitude
+            remove = 3
+            for i in range(61):
+                for j in range(remove):
+                    max_arg = np.argmax(all_snr[:,i])
+                    all_snr[max_arg,i] = 0
+            n_snr = (len(all_snr)-remove)
+            mean_snr = np.sum(all_snr,axis=0)/n_snr
+            ax.plot(10*np.log10(mean_snr), alt, label='Drop', color=(1-vi/8,0,0), linestyle=ls_d)
+            ax.plot(10*np.log10(mean_abmod), alt, label='Abmod', color=(0,0,1-vi/8), linestyle=ls_mod)
+            ax.tick_params(direction='in')
+            handles.append(mlines.Line2D([],[],color=(1-vi/8,0,0), linestyle='solid', markersize=8, label=f'\nv={int((int(vels[vi])+int(v2s[vi]))/2)}km/s\nm={int(mean_mass)}$\mu$g'))
+            handles_mod.append(mlines.Line2D([],[],color=(0,0,1-vi/8), linestyle='dashed', markersize=8, label=f'\n \n'))
+    
+        
+
+        
+
+        ax.set_xlabel('SNR (dB)',loc='right')
+        ax.set_ylabel('Altitude (km)',loc='top')
+        leg =ax.legend(handles=handles, loc='upper left', bbox_to_anchor=(1,1), frameon=False,ncol=1,borderaxespad=0.0,handletextpad=0.3)
+        ax.add_artist(leg)
+        legend1 = plt.legend(handles=handles_mod, loc='upper left', bbox_to_anchor=(1,1.0-0.02), framealpha=0,frameon=False,ncol=1,borderaxespad=0.0,handletextpad=0.3)
+        plt.gca().add_artist(legend1)
+        ax.set_xlim(-50, 50)
+        plt.text(27,128,f'ZA$\in$({zas[zi]},{zas[zi+1]})')
+        plt.savefig(f'/home/hakon/Documents/abmod/new_imgs/compare_all_za{zas[zi]}',dpi=300)
+        plt.close()
+compare_vels()

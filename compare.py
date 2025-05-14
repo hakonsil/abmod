@@ -219,7 +219,7 @@ if False:
 
 all_drop = np.zeros((1,61))
 all_nodrop = np.zeros((1,61))
-if False:
+if True:
     for zi in range(5):
         for vi in range(6):
             #zi=3
@@ -247,8 +247,8 @@ if False:
     print(all_nodrop.shape)
     mean_drop = np.mean(all_drop, axis=0)
     mean_nodrop = np.mean(all_nodrop, axis=0)
-    se_drop = 1.96*np.std(all_drop, axis=0)/np.sqrt(len(all_drop))
-    se_nodrop = 1.96*np.std(all_nodrop, axis=0)/np.sqrt(len(all_drop))
+    se_drop = 1.96*np.std(all_drop, axis=0)/np.sqrt(len(all_drop)-5)
+    se_nodrop = 1.96*np.std(all_nodrop, axis=0)/np.sqrt(len(all_drop)-5)
     fig = plt.figure(figsize=(fig_width,10))
     ax = fig.add_axes([0.1,0.1,0.84,0.7])
     ax.plot(10*np.log10(mean_drop), alt, label='Drop', color=c_d, linestyle=ls_d)
@@ -546,5 +546,5 @@ def compare_vels():
         plt.savefig(f'/home/hakon/Documents/abmod/new_imgs/compare_all_za{zas[zi]}',dpi=300)
         plt.close()
 
-compare_all()
-compare_vels()
+#compare_all()
+#compare_vels()

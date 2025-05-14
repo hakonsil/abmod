@@ -219,7 +219,7 @@ if False:
 
 all_drop = np.zeros((1,61))
 all_nodrop = np.zeros((1,61))
-if True:
+if False:
     for zi in range(5):
         for vi in range(6):
             #zi=3
@@ -471,7 +471,7 @@ def compare_all():
     ax.plot(10*np.log10(mean_abmod), alt, label='Abmod', color=c_mod, linestyle=ls_mod)
     ax.set_xlabel('SNR (dB)',loc='right')
     ax.set_ylabel('Altitude (km)',loc='top')
-    ax.legend(handles=[nodrop_line,nodrop_error,abmod_line], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=3,borderaxespad=0.0,handletextpad=0.3)
+    ax.legend(handles=[all_line,nodrop_error,abmod_line], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=3,borderaxespad=0.0,handletextpad=0.3)
     ax.set_xlim(-50, 50)
     ax.tick_params(direction='in')
     plt.savefig('/home/hakon/Documents/abmod/new_imgs/compare_all',dpi=300)
@@ -548,5 +548,5 @@ def compare_vels():
         plt.savefig(f'/home/hakon/Documents/abmod/new_imgs/compare_all_za{zas[zi]}',dpi=300)
         plt.close()
 
-#compare_all()
+compare_all()
 #compare_vels()

@@ -238,17 +238,17 @@ if True:
     all_nodrop = all_nodrop[1:,:]
     # remove outlier by zeroing out the top 3 values at each altitude
     for i in range(61):
-        for j in range(5):
+        for j in range(10):
             max_arg = np.argmax(all_drop[:,i])
             all_drop[max_arg,i] = 0
             max_arg = np.argmax(all_nodrop[:,i])
             all_nodrop[max_arg,i] = 0
     print(all_drop.shape)
     print(all_nodrop.shape)
-    mean_drop = np.mean(all_drop, axis=0)
-    mean_nodrop = np.mean(all_nodrop, axis=0)
-    se_drop = 1.96*np.std(all_drop, axis=0)/np.sqrt(len(all_drop)-5)
-    se_nodrop = 1.96*np.std(all_nodrop, axis=0)/np.sqrt(len(all_drop)-5)
+    mean_drop = np.sum(all_drop, axis=0)/(len(all_drop)-10)
+    mean_nodrop = np.sum(all_nodrop, axis=0)/(len(all_nodrop)-10)
+    se_drop = 1.96*np.std(all_drop, axis=0,ddof=10)/np.sqrt(len(all_drop)-10)
+    se_nodrop = 1.96*np.std(all_nodrop, axis=0,ddof=10)/np.sqrt(len(all_drop)-10)
     fig = plt.figure(figsize=(fig_width,10))
     ax = fig.add_axes([0.1,0.1,0.84,0.7])
     ax.plot(10*np.log10(mean_drop), alt, label='Drop', color=c_d, linestyle=ls_d)

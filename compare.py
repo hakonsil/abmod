@@ -34,14 +34,15 @@ drop_error = mlines.Line2D([],[],color=c_d, linestyle='solid',markersize=8,linew
 
 
 
-path = '/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/'
+path = '/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/USE_snr0_anem100_c0.5/'
 abmod_files = glob.glob('/home/hakon/Documents/abmod/runs/run_ 1*.txt')
 
 m_add = 0
 files = glob.glob(path + "*.h5")
-files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_0_30.h5')
-files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_30_60.h5')
-files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_60_90.h5')
+print(len(files))
+#files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_0_30.h5')
+#files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_30_60.h5')
+#files.remove('/home/hakon/Documents/meteor_fork/hakon/master/dl_analysed/new_profiles/snr10_anem0.05_c0.5/snr_za_60_90.h5')
 
 
 def compare_snr(za_idx, vel_idx, files, mass='500', uncertainty='', plot=True, combine_drop=False, compare_drops=False):
@@ -544,4 +545,6 @@ def compare_vels():
         plt.text(27,128,f'ZA$\in$({zas[zi]},{zas[zi+1]})')
         plt.savefig(f'/home/hakon/Documents/abmod/new_imgs/compare_all_za{zas[zi]}',dpi=300)
         plt.close()
+
+compare_all()
 compare_vels()

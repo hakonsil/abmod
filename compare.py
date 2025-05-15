@@ -219,7 +219,7 @@ if False:
 
 all_drop = np.zeros((1,61))
 all_nodrop = np.zeros((1,61))
-if False:
+if True:
     for zi in range(5):
         for vi in range(6):
             #zi=3
@@ -244,6 +244,7 @@ if False:
             all_drop[max_arg,i] = 0
             max_arg = np.argmax(all_nodrop[:,i])
             all_nodrop[max_arg,i] = 0
+    
     print(all_drop.shape)
     print(all_nodrop.shape)
     mean_drop = np.sum(all_drop, axis=0)/(len(all_drop)-remove)
@@ -261,9 +262,9 @@ if False:
     ax.legend(handles=[nodrop_line, nodrop_error,drop_line,drop_error], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=2,borderaxespad=0.0,handletextpad=0.3)
     ax.set_xlim(-50, 50)
     ax.tick_params(direction='in')
-    plt.savefig('/home/hakon/Documents/abmod/new_imgs/mean_profile_d_nd',dpi=300)
-    plt.close()
-    #plt.show()
+    #plt.savefig('/home/hakon/Documents/abmod/new_imgs/mean_profile_d_nd',dpi=300)
+    #plt.close()
+    plt.show()
 
     """all_meteors = np.concatenate((all_drop, all_nodrop), axis=0)
     mean_all = np.mean(all_meteors, axis=0)
@@ -548,5 +549,5 @@ def compare_vels():
         plt.savefig(f'/home/hakon/Documents/abmod/new_imgs/compare_all_za{zas[zi]}',dpi=300)
         plt.close()
 
-compare_all()
+#compare_all()
 #compare_vels()

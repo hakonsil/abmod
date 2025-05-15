@@ -219,7 +219,7 @@ if False:
 
 all_drop = np.zeros((1,61))
 all_nodrop = np.zeros((1,61))
-if True:
+if False:
     for zi in range(5):
         for vi in range(6):
             #zi=3
@@ -450,18 +450,18 @@ def compare_all():
                     
 
                 
-        all_abmod = all_abmod[1:,:]
-        all_snr = all_snr[1:,:]
-        mean_abmod = np.sum(all_abmod, axis=0)/np.sum(counts)
-        #remove outlier by zeroing out the top 3 values at each altitude
-        remove = 5
-        for i in range(61):
-            for j in range(remove):
-                max_arg = np.argmax(all_snr[:,i])
-                all_snr[max_arg,i] = 0
-        n_snr = (len(all_snr)-remove)
-        mean_snr = np.sum(all_snr,axis=0)/n_snr
-        ci_snr = 1.96*np.std(all_snr,axis=0)/np.sqrt(n_snr-remove)
+    all_abmod = all_abmod[1:,:]
+    all_snr = all_snr[1:,:]
+    mean_abmod = np.sum(all_abmod, axis=0)/np.sum(counts)
+    #remove outlier by zeroing out the top 3 values at each altitude
+    remove = 5
+    for i in range(61):
+        for j in range(remove):
+            max_arg = np.argmax(all_snr[:,i])
+            all_snr[max_arg,i] = 0
+    n_snr = (len(all_snr)-remove)
+    mean_snr = np.sum(all_snr,axis=0)/n_snr
+    ci_snr = 1.96*np.std(all_snr,axis=0,ddof=remove)/np.sqrt(n_snr)
     
         
 
@@ -477,6 +477,7 @@ def compare_all():
     ax.tick_params(direction='in')
     plt.savefig('/home/hakon/Documents/abmod/new_imgs/compare_all',dpi=300)
     plt.close()
+    #plt.show()
 
 def compare_vels():
     vels = ['10', '20', '30', '40', '50', '60']
@@ -549,5 +550,5 @@ def compare_vels():
         plt.savefig(f'/home/hakon/Documents/abmod/new_imgs/compare_all_za{zas[zi]}',dpi=300)
         plt.close()
 
-#compare_all()
+compare_all()
 #compare_vels()

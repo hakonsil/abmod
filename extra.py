@@ -57,7 +57,7 @@ for f in files:
             continue
 
 
-density = 1000
+density = 400
 radii = bcs/density
 volume = (4/3)*np.pi*radii**3
 mass = density*volume*1e9
@@ -92,7 +92,7 @@ for i in tqdm(range(len(vels))):
                     for l in range(45):
                         if mass[i] >= mbins[l] and mass[i] < mbins[l+1]:
                             counts[j][k][l] += 1
-with h5py.File('/home/hakon/Documents/abmod/counts.h5', 'w') as hf:
+with h5py.File('/home/hakon/Documents/abmod/counts_400.h5', 'w') as hf:
     hf.create_dataset('counts', data=counts)
 
 

@@ -422,7 +422,7 @@ def compare_all():
     vels = ['10', '20', '30', '40', '50', '60']
     v2s = ['20', '30', '40', '50', '60', '73']
     zas = ['0', '10', '30', '50', '70','90']
-    with h5py.File('/home/hakon/Documents/abmod/counts.h5', 'r') as hf:
+    with h5py.File('/home/hakon/Documents/abmod/counts_400.h5', 'r') as hf:
         counts = hf['counts'][()]
     all_abmod = np.zeros((1,61))
     all_snr = np.zeros((1,61))
@@ -483,7 +483,7 @@ def compare_vels():
     vels = ['10', '20', '30', '40', '50', '60']
     v2s = ['20', '30', '40', '50', '60', '73']
     zas = ['0', '10', '30', '50', '70','90']
-    with h5py.File('/home/hakon/Documents/abmod/counts.h5', 'r') as hf:
+    with h5py.File('/home/hakon/Documents/abmod/counts_400.h5', 'r') as hf:
         counts = hf['counts'][()]
 
 

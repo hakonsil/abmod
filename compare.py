@@ -475,9 +475,9 @@ def compare_all():
     ax.legend(handles=[all_line,nodrop_error,abmod_line], loc='upper left', bbox_to_anchor=(0,1.15), frameon=False,ncol=3,borderaxespad=0.0,handletextpad=0.3)
     ax.set_xlim(-50, 50)
     ax.tick_params(direction='in')
-    plt.savefig('/home/hakon/Documents/abmod/new_imgs/compare_all',dpi=300)
-    plt.close()
-    #plt.show()
+    #plt.savefig('/home/hakon/Documents/abmod/new_imgs/compare_all',dpi=300)
+    #plt.close()
+    plt.show()
 
 def compare_vels():
     vels = ['10', '20', '30', '40', '50', '60']

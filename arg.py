@@ -151,7 +151,7 @@ plt.close()
 
 
 
-
+print(max(test_acc))
 
 fig = plt.figure(figsize=(fig_width, 8))
 ax1 = fig.add_subplot(121)

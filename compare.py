@@ -521,6 +521,7 @@ def compare_vels():
             all_snr = all_snr[1:,:]
             mean_abmod = np.sum(all_abmod, axis=0)/np.sum(counts[vi][zi])
             mean_mass = np.sum(vel_masses)/np.sum(counts[vi][zi])
+            
             #remove outlier by zeroing out the top 3 values at each altitude
             remove = 3
             for i in range(61):
@@ -550,5 +551,69 @@ def compare_vels():
         plt.savefig(f'/home/hakon/Documents/abmod/new_imgs/compare_all_za{zas[zi]}',dpi=300)
         plt.close()
 
-compare_all()
+
+
+def compare_vels_d_nd(zi,vi):
+    vels = ['10', '20', '30', '40', '50', '60']
+    v2s = ['20', '30', '40', '50', '60', '73']
+    zas = ['0', '10', '30', '50', '70','90']
+    hf = h5py.File('/home/hakon/Documents/abmod/masses.h5','r')
+    mass_drop = hf['mass_drop'][()]
+    mass_nodrop = hf['mass_nodrop'][()]
+    hf.close()
+
+
+    fig = plt.figure(figsize=(fig_width,10))
+    ax = fig.add_axes([0.1,0.1,0.85,0.78])
+
+    snr_dict = compare_snr(zi, vi, files,plot=False, combine_drop=False)    
+    drop = snr_dict['snr_drop']
+    nodrop = snr_dict['snr_nodrop']
+    alt = snr_dict['alt']
+    
+    
+    #remove outlier by zeroing out the top 3 values at each altitude
+    remove = 10
+    for i in range(61):
+        for j in range(remove):
+            max_arg_drop = np.argmax(drop[:,i])
+            max_arg_nodrop = np.argmax(nodrop[:,i])
+            drop[max_arg_drop,i] = 0
+            nodrop[max_arg_nodrop,i]=0
+    for i in range(61):
+        for j in range(remove):
+            min_arg_drop = np.argmin(drop[:,i])
+            min_arg_nodrop = np.argmin(nodrop[:,i])
+            drop[min_arg_drop,i] = 0
+            nodrop[min_arg_nodrop,i]=0
+    remove=remove*2
+
+    print(f'Number of drops {len(drop)}\nNumber of non-drops {len(nodrop)}')
+
+    mean_drop = np.sum(drop,axis=0)/(len(drop)-remove)
+    mean_nodrop = np.sum(nodrop,axis=0)/(len(nodrop)-remove)
+    ax.plot(10*np.log10(mean_drop), alt, label='Drop', color=(1,0,0), linestyle='dashed')
+    ax.plot(10*np.log10(mean_nodrop), alt, label='No drop', color=(0,0,0), linestyle='solid')
+    ax.tick_params(direction='in')
+    drop_handle = mlines.Line2D([],[],color=(1,0,0), linestyle='dashed', markersize=8, label=f'SNR drop,  n={len(drop)-remove},  m$_{{avg}}$ = {np.round(mass_drop[vi,zi],2)}$\mu$g')
+    nodrop_handle = mlines.Line2D([],[],color=(0,0,0), linestyle='solid', markersize=8, label=f'No SNR drop,  n={len(nodrop)-remove},  m$_{{avg}}$ = {np.round(mass_nodrop[vi,zi],2)}$\mu$g')
+    
+
+    ax.set_xlabel('SNR (dB)',loc='right')
+    ax.set_ylabel('Altitude (km)',loc='top')
+    leg =ax.legend(handles=[nodrop_handle,drop_handle], loc='upper left', bbox_to_anchor=(0,1.14), frameon=False,ncol=1,borderaxespad=0.0,handletextpad=0.3)
+    ax.add_artist(leg)
+    #legend1 = plt.legend(handles=nodrop_handle, loc='upper left', bbox_to_anchor=(1,1.0-0.02), framealpha=0,frameon=False,ncol=1,borderaxespad=0.0,handletextpad=0.3)
+    #plt.gca().add_artist(legend1)
+    ax.set_xlim(-50, 50)
+    ax.set_ylim(70,130)
+    plt.text(31,123,f'$\\alpha \in$({zas[zi]},{zas[zi+1]})\nv$\in$({vels[vi]},{v2s[vi]})')
+    plt.savefig(f'/home/hakon/Documents/abmod/fig_d_nd/compare_{vels[vi]}_{zas[zi]}',dpi=300)
+    plt.close()
+    #plt.show()
+
+for vi in range(6):
+    for zi in range(5):
+        compare_vels_d_nd(zi,vi)
+#compare_all()
 #compare_vels()

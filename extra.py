@@ -37,7 +37,7 @@ def get_files():
 files = get_files()
 print(len(files))
 
-
+"""
 bcs = np.array([])
 vels = np.array([])
 zas = np.array([])
@@ -57,7 +57,7 @@ for f in files:
             continue
 
 
-density = 400
+density = 1000
 radii = bcs/density
 volume = (4/3)*np.pi*radii**3
 mass = density*volume*1e9
@@ -94,29 +94,69 @@ for i in tqdm(range(len(vels))):
                             counts[j][k][l] += 1
 with h5py.File('/home/hakon/Documents/abmod/counts_400.h5', 'w') as hf:
     hf.create_dataset('counts', data=counts)
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-mass divided by vel
-<20: 129.76744093245927
-20-30: 70.53021042252533
-30-40: 48.392138768685285
-40-50: 35.3103003043128
-50-60: 19.645068859234712
->60: 33.62726344245044
-
-to do:
-create a file where i can input mass velocity and zenith angle bins and get the number of meteors in each bin
 """
 
 
+
+
+bcs = np.array([])
+vels = np.array([])
+zas = np.array([])
+cnn_out = np.array([])
+for f in files:
+    with h5py.File(f, 'r') as hf:
+        try:
+            bc = hf['bc'][:]
+            vel = hf['vels'][:]
+            za = hf['zenith_angle'][:]
+            cnn_output = hf['cnn_output'][()]
+
+            bcs= np.concatenate((bcs, bc))
+            vels = np.concatenate((vels, vel))
+            zas = np.concatenate((zas, za))
+            cnn_out = np.concatenate((cnn_out,cnn_output[:,1]))
+
+        except KeyError:
+            print(f"KeyError: {f} does not contain 'bc' or 'vel' key.")
+            continue
+
+density = 1000
+radii = bcs/density
+volume = (4/3)*np.pi*radii**3
+mass = density*volume*1e9
+mass[mass>4000]=np.nan
+#remove nans
+vels = vels[~np.isnan(mass)]
+zas = zas[~np.isnan(mass)]
+cnn_out = cnn_out[~np.isnan(mass)]
+mass = mass[~np.isnan(mass)]
+
+
+mass=np.clip(mass,1e-3,1e3)
+
+vbins = [0, 20, 30, 40, 50, 60, 100]
+zbin = [0, 10, 30, 50, 70,90]
+
+mean_mass_drop = np.zeros((6,5))
+mean_mass_nodrop = np.zeros((6,5))
+n_mass_drop = np.zeros((6,5))
+n_mass_nodrop = np.zeros((6,5))
+
+for i in tqdm(range(len(vels))):
+    for j in range(6):
+        if vels[i] >= vbins[j] and vels[i] < vbins[j+1]:
+            for k in range(5):
+                if zas[i] >= zbin[k] and zas[i] < zbin[k+1]:
+                    if cnn_out[i]>=0.5:
+                        mean_mass_drop[j,k] += mass[i]
+                        n_mass_drop[j,k] +=1
+                    elif cnn_out[i]<0.5:
+                        mean_mass_nodrop[j,k] += mass[i]
+                        n_mass_nodrop[j,k] +=1
+
+mean_mass_drop = mean_mass_drop/n_mass_drop
+mean_mass_nodrop = mean_mass_nodrop/n_mass_nodrop
+
+with h5py.File('/home/hakon/Documents/abmod/masses.h5', 'w') as hf:
+    hf.create_dataset('mass_nodrop', data=mean_mass_nodrop)
+    hf.create_dataset('mass_drop', data=mean_mass_drop)

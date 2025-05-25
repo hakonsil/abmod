@@ -65,20 +65,28 @@ file_1000 = np.loadtxt('/home/hakon/Documents/meteor_fork/hakon/master/msis_plot
 altitude = np.concatenate((file_149[:,0], file_299[:,0], file_449[:,0], file_600[:,0], file_750[:,0], file_899[:,0], file_1000[:,0]))
 density = np.concatenate((file_149[:,1], file_299[:,1], file_449[:,1], file_600[:,1], file_750[:,1], file_899[:,1], file_1000[:,1]))
 
+file_jan = np.loadtxt('/home/hakon/Documents/abmod/msis/jan.txt', skiprows=1, usecols=(5,11))
+file_july = np.loadtxt('/home/hakon/Documents/abmod/msis/july.txt', skiprows=1, usecols=(5,11))
+altitude_jan = file_jan[:,0]
+altitude_july = file_july[:,0]
+density_jan = file_jan[:,1]*1e3
+density_july = file_july[:,1]*1e3
+
 # convert density from g/cm^3 to kg/m^3
-density = density * 1000
+#density = density * 1000
 
 fig = plt.figure(figsize=(fig_width, 8))
 ax = fig.add_subplot(111)
 fig.subplots_adjust(left=0.111, right=0.972, top=0.966, bottom=0.11, wspace=0.2, hspace=0.2)
-ax.plot(density, altitude, color='k', lw=lw, ls=ls_d, label='Atmospheric density')
+ax.plot(density_jan, altitude_jan, color='k', lw=lw, ls='solid', label='January 2025')
+ax.plot(density_july, altitude_july, color='r', lw=lw, ls='dashed', label='July 2024')
 ax.set_xlabel('Density (kg/m$^3$)', loc='right')
 ax.set_ylabel('Altitude (km)', loc='top')
-ax.set_ylim(0, 1000)
+ax.set_ylim(50, 199)
 ax.set_xscale('log')
 ax.legend(loc='upper right', fontsize=12*2, frameon=False)
 ax.tick_params(direction='in')
-plt.savefig('/home/hakon/Documents/abmod/msis.png', dpi=300)
+plt.savefig('/home/hakon/Documents/abmod/msis/msis_new.png', dpi=300)
 plt.close()
 
 
@@ -128,7 +136,7 @@ plt.show()"""
 
 
 
-
+"""
 cm_test = np.array([[446,41],[104,390]])
 cm_train = np.array([[1911,83],[113,1894]])
 #cm_test = cm_test.astype('float') / cm_test.sum(axis=1)[:, np.newaxis]
@@ -177,7 +185,7 @@ ax2.tick_params(direction='in')
 
 plt.savefig('/home/hakon/Documents/abmod/dl_training.png', dpi=300)
 
-
+"""
 
 
 

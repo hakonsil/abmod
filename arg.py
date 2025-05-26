@@ -98,40 +98,76 @@ test_loss = np.loadtxt('/home/hakon/Documents/meteor_fork/hakon/master/dl_plots/
 train_loss = np.loadtxt('/home/hakon/Documents/meteor_fork/hakon/master/dl_plots/train_loss.txt', delimiter=',')
 
 
-"""with h5py.File('/home/hakon/Documents/meteor_fork/data/2020/01/kep_collect.h5', 'r') as hf:
+with h5py.File('/home/hakon/Documents/meteor_fork/data/2020/01/kep_collect.h5', 'r') as hf:
     cnn_input = hf['cnn_input'][()]
 ex = cnn_input[1]
-plt.subplot(711)
-plt.plot(ex[0],'k.')#rcs
-plt.xlim(0, 256)
-plt.ylim(0, 1)
-plt.subplot(712)
-plt.plot(ex[1],'k.')#snr
-plt.xlim(0, 256)
-plt.ylim(0, 1)
-plt.subplot(713)
-plt.plot(ex[2],'k.')#zpp
-plt.xlim(0, 256)
-plt.ylim(0, 1)
-plt.subplot(714)
-plt.plot(ex[3],'k.')#beam pos
-plt.xlim(0, 256)
-plt.ylim(0, 1)
-plt.subplot(715)
-plt.plot(ex[4],'k.')#pos_e
-plt.xlim(0, 256)
-plt.ylim(0, 1)
-plt.subplot(716)
-plt.plot(ex[5],'k.')#pos_n
-plt.xlim(0, 256)
-plt.ylim(0, 1)
-plt.subplot(717)
-plt.plot(ex[6],'k.')#pos_u
-plt.xlim(0, 256)
-plt.ylim(0, 1)
-# define the font and size for x and y axis labels
-plt.show()"""
+fig = plt.figure(figsize=(fig_width, 12))
 
+ax7 = fig.add_subplot(717)
+ax7.plot(ex[6],color='k',lw=2)
+ax7.set_xlim(0,256)
+ax7.set_ylim(0,1)
+ax7.set_xticks([0,50,100,150,200,256])
+#ax7.set_yticks([])
+ax7.tick_params(direction='in')
+
+ax6 = fig.add_subplot(716, sharex=ax7)
+ax6.plot(ex[5],color='k',lw=2)
+ax6.set_xlim(0,256)
+ax6.set_ylim(0,1)
+ax6.tick_params(direction='in')
+#ax6.set_yticks([])
+plt.setp(ax6.get_xticklabels(), visible=False)
+
+ax5 = fig.add_subplot(715, sharex=ax7)
+ax5.plot(ex[4],color='k',lw=2)
+ax5.set_xlim(0,256)
+ax5.set_ylim(0,1)
+ax5.tick_params(direction='in')
+#ax5.set_yticks([])
+plt.setp(ax5.get_xticklabels(), visible=False)
+ax4 = fig.add_subplot(714, sharex=ax7)
+ax4.plot(ex[3],color='k',lw=2)
+ax4.set_xlim(0,256)
+ax4.set_ylim(0,1)
+#ax4.set_yticks([])
+ax4.tick_params(direction='in')
+plt.setp(ax4.get_xticklabels(), visible=False)
+ax3 = fig.add_subplot(713, sharex=ax7)
+ax3.plot(ex[2],color='k',lw=2)
+ax3.set_xlim(0,256)
+ax3.set_ylim(0,1)
+#ax3.set_yticks([])
+ax3.tick_params(direction='in')
+plt.setp(ax3.get_xticklabels(), visible=False)  
+ax2 = fig.add_subplot(712, sharex=ax7)
+ax2.plot(ex[1],color='k',lw=2)
+ax2.set_xlim(0,256)
+#ax2.set_yticks([])
+ax2.set_ylim(0,1)
+ax2.tick_params(direction='in')
+plt.setp(ax2.get_xticklabels(), visible=False)
+ax1 = fig.add_subplot(711, sharex=ax7)
+ax1.plot(ex[0],color='k',lw=2)
+ax1.set_xlim(0,256)
+#ax1.set_yticks([])
+ax1.set_ylim(0,1)
+ax1.tick_params(direction='in')
+ax1.yaxis.set_major_locator(plt.MaxNLocator(1))
+plt.setp(ax1.get_xticklabels(), visible=False)
+
+ax2.yaxis.set_major_locator(plt.MaxNLocator(1))
+ax3.yaxis.set_major_locator(plt.MaxNLocator(1))
+ax4.yaxis.set_major_locator(plt.MaxNLocator(1))     
+ax5.yaxis.set_major_locator(plt.MaxNLocator(1))
+ax6.yaxis.set_major_locator(plt.MaxNLocator(1))
+ax7.yaxis.set_major_locator(plt.MaxNLocator(1))
+
+
+fig.subplots_adjust(left=0.027, right=0.975, top=0.986, bottom=0.036, wspace=0.2, hspace=0.292)
+plt.savefig('/home/hakon/Documents/abmod/cnn_input.png',dpi=300)
+plt.close()
+#plt.show()
 
 
 

@@ -607,7 +607,7 @@ def compare_vels_d_nd(zi,vi):
     #plt.gca().add_artist(legend1)
     ax.set_xlim(-50, 50)
     ax.set_ylim(70,130)
-    plt.text(31,123,f'$ZA \in$({zas[zi]},{zas[zi+1]})\nv$\in$({vels[vi]},{v2s[vi]})')
+    plt.text(31,123,f'ZA $\in$({zas[zi]},{zas[zi+1]})\nv$\in$({vels[vi]},{v2s[vi]})')
     plt.savefig(f'/home/hakon/Documents/abmod/fig_d_nd/compare_{vels[vi]}_{zas[zi]}',dpi=300)
     plt.close()
     #plt.show()
